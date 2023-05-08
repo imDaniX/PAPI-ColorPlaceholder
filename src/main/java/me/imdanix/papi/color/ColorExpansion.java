@@ -6,6 +6,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.UnaryOperator;
+
 import static me.clip.placeholderapi.PlaceholderAPI.setBracketPlaceholders;
 import static me.clip.placeholderapi.PlaceholderAPI.setRelationalPlaceholders;
 import static org.bukkit.ChatColor.translateAlternateColorCodes;
@@ -27,12 +29,8 @@ public class ColorExpansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, @NotNull String params) {
-        String bracket = "{" + params + "}";
-        String parsed = setBracketPlaceholders(player, bracket);
-        return bracket.equals(parsed)
-                ? null
-                : translateAlternateColorCodes('&', parsed);
+    public String onPlaceholderRequest(Player player1, Player player2, String params) {
+        return colorIfParsed(params, bracket -> setRelationalPlaceholders(player1, player2, bracket));
     }
 
     @Override
@@ -41,9 +39,13 @@ public class ColorExpansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public String onPlaceholderRequest(Player player1, Player player2, String params) {
+    public String onRequest(OfflinePlayer player, @NotNull String params) {
+        return colorIfParsed(params, bracket -> setBracketPlaceholders(player, bracket));
+    }
+
+    private static String colorIfParsed(String params, UnaryOperator<String> parser) {
         String bracket = "{" + params + "}";
-        String parsed = setRelationalPlaceholders(player1, player2, bracket);
+        String parsed = parser.apply(bracket);
         return bracket.equals(parsed)
                 ? null
                 : translateAlternateColorCodes('&', parsed);
