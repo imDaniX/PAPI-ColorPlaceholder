@@ -7,12 +7,15 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import static me.clip.placeholderapi.PlaceholderAPI.setBracketPlaceholders;
 import static me.clip.placeholderapi.PlaceholderAPI.setRelationalPlaceholders;
 import static org.bukkit.ChatColor.translateAlternateColorCodes;
 
 public class ColorExpansion extends PlaceholderExpansion implements Relational {
+    private static final Pattern HEX_COLOR = Pattern.compile("&#" + "([0-9a-fA-F])".repeat(6));
+
     @Override
     public @NotNull String getIdentifier() {
         return "color";
@@ -48,6 +51,9 @@ public class ColorExpansion extends PlaceholderExpansion implements Relational {
         String parsed = parser.apply(bracket);
         return bracket.equals(parsed)
                 ? null
-                : translateAlternateColorCodes('&', parsed);
+                : translateAlternateColorCodes(
+                        '&',
+                        HEX_COLOR.matcher(parsed).replaceAll("§x§$1§$2§$3§$4§$5§$6")
+                );
     }
 }

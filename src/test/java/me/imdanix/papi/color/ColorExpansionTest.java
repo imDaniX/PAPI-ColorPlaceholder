@@ -27,20 +27,21 @@ public class ColorExpansionTest {
     @DataProvider
     public Object[][] onRequestData() {
         return new Object[][] {
-                {"placeholder", "&aHello", "§aHello"},
-                {"placeholder", "&aHello&x&1&2&3&4&5&6", "§aHello§x§1§2§3§4§5§6"},
-                {"placeholder", "Test", "Test"},
-                {"placeholder", "{placeholder}", null}
+                {"&aHello", "§aHello"},
+                {"&aHello&x&1&2&3&4&5&6", "§aHello§x§1§2§3§4§5§6"},
+                {"&aHello&#123456", "§aHello§x§1§2§3§4§5§6"},
+                {"Test", "Test"},
+                {"{placeholder}", null}
         };
     }
 
     @Test(dataProvider = "onRequestData")
-    public void onRequestTest(String params, String phResult, String expected) {
+    public void onRequestTest(String phResult, String expected) {
         try (MockedStatic<PlaceholderAPI> mockPapi = Mockito.mockStatic(PlaceholderAPI.class)) {
             mockPapi.when(() -> PlaceholderAPI.setBracketPlaceholders(nullable(OfflinePlayer.class), nullable(String.class)))
                     .thenReturn(phResult);
             assertEquals(
-                    expansion.onPlaceholderRequest(mockPlayer, params),
+                    expansion.onPlaceholderRequest(mockPlayer, "placeholder"),
                     expected
             );
         }
